@@ -1,0 +1,31 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Flask instance folder
+instance/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# Selenium / Chrome user data
+chrome_profile/
+
+# Tokens / secrets
+git_token.txt
