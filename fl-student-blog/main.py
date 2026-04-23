@@ -2,18 +2,18 @@ from datetime import date
 from flask import Flask, abort, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
-from flask_gravatar import Gravatar
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text, ForeignKey
 from functools import wraps
-from werkzeug.security import generate_password_hash, check_password_hash
+from authlib.integrations.flask_client import OAuth
+from dotenv import load_dotenv
 import os
 # Import your forms from the forms.py
-from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+from forms import CreatePostForm, CommentForm
 
-
+load_dotenv()
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -24,11 +24,20 @@ app = Flask(
 )
 db_path = os.path.join(app.instance_path, "posts.db")
 
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY")
+
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
+
 ckeditor = CKEditor(app)
 Bootstrap5(app)
 
-# TODO: Configure Flask-Login
 
 
 # CREATE DATABASE
@@ -43,8 +52,9 @@ class User(UserMixin, db.Model):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(String(100), nullable=False)
+    google_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)    
     name: Mapped[str] = mapped_column(String(100), nullable=False) 
+    img_url: Mapped[str] = mapped_column(String(500), nullable=True)
     #This will act like a List of BlogPost objects attached to each User. 
     #The "author" refers to the author property in the BlogPost class.
     posts = relationship("BlogPost", back_populates="author")
@@ -83,14 +93,6 @@ with app.app_context():
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-gravatar = Gravatar(app,
-                    size=100,
-                    rating='g',
-                    default='retro',
-                    force_default=False,
-                    force_lower=False,
-                    use_ssl=False,
-                    base_url=None)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -99,60 +101,52 @@ def load_user(user_id):
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.id != 1:
+        if not current_user.is_authenticated or current_user.email != "scottsomerville@flireland.com":
             return abort(403)
         return f(*args, **kwargs)
     return decorated_function
 
 # TODO: Use Werkzeug to hash the user's password when creating a new user.
-@app.route('/register', methods=["GET", "POST"])
-def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        email = form.email.data
-        result = db.session.execute(db.select(User).where(User.email == email))
-        user = result.scalar()
-        if user:
-            flash("You've already signed up with that email, log in instead!")
-            return redirect(url_for('login'))
-        hash_and_salted_password = generate_password_hash(
-            form.password.data,
-            method='pbkdf2:sha256',
-            salt_length=8
-        )
-        new_user = User(
-            name=form.name.data,
-            email=form.email.data,
-            password=hash_and_salted_password
-        )
-
-        db.session.add(new_user)
-        db.session.commit()
-        login_user(new_user)
-        return redirect(url_for("get_all_posts"))
-    return render_template("register.html", form=form)
 
 
 # TODO: Retrieve a user from the database based on their email. 
-@app.route('/login', methods=["GET", "POST"])
+@app.route('/login')
 def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        email = form.email.data   
-        password = form.password.data
-        result = db.session.execute(
-            db.select(User).where(User.email == email)
-        )
-        user = result.scalar_one_or_none()
-        if not user or not check_password_hash(user.password, password):
-            flash("Invalid email or password","error")
-            return redirect(url_for("login"))
-        else:
-            login_user(user)
-            flash("Logged in successfully", "success")
-            return redirect(url_for("get_all_posts"))
-    return render_template("login.html", form=form)
+    redirect_uri = url_for('auth_callback', _external=True)
+    return google.authorize_redirect(redirect_uri)
     
+@app.route('/auth/callback')
+def auth_callback():
+    # 1. The Exchange
+    token = google.authorize_access_token()
+    user_info = token.get('userinfo')
+    
+    # 2. The Gatekeeper (Domain Check)
+    email = user_info.get('email')
+    SCHOOL_DOMAIN = "flireland.com" # Replace with yours!
+    if not email.endswith(f"@{SCHOOL_DOMAIN}"):
+        flash(f"Access Denied. You must use a @{SCHOOL_DOMAIN} account.", "danger")
+        return redirect(url_for("get_all_posts"))
+
+    # 3. The Database Lookup
+    google_id = user_info.get('sub')
+    user = db.session.execute(db.select(User).where(User.google_id == google_id)).scalar()
+
+    # 4. Just-In-Time Registration
+    if not user:
+        user = User(
+            email=email,
+            name=user_info.get('name'),
+            google_id=google_id,
+            img_url=user_info.get('picture')
+        )
+        db.session.add(user)
+        db.session.commit()
+
+    # 5. The Session Hand-off
+    login_user(user)
+    flash(f"Welcome, {user.name}!", "success")
+    return redirect(url_for("get_all_posts"))
 
 @app.route('/logout')
 def logout():

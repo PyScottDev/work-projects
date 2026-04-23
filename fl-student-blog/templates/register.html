@@ -1,7 +1,6 @@
-{% from "bootstrap5/form.html" import render_form %} {% block content %} {%
-include "header.html" %}
+{% block content %} 
+{% include "header.html" %}
 
-<!-- Page Header -->
 <header
   class="masthead"
   style="background-image: url('../static/assets/img/register-bg.jpg')"
@@ -10,7 +9,7 @@ include "header.html" %}
     <div class="row gx-4 gx-lg-5 justify-content-center">
       <div class="col-md-10 col-lg-8 col-xl-7">
         <div class="page-heading">
-          <h1>Register</h1>
+          <h1>Sign Up</h1>
           <span class="subheading">Start Contributing to the Blog!</span>
         </div>
       </div>
@@ -21,12 +20,24 @@ include "header.html" %}
 <main class="mb-4">
   <div class="container">
     <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-        <!--TODO: render your registration form here-->
-        {{render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+      <div class="col-lg-8 col-md-10 mx-auto text-center">
+        
+        <h3 class="mb-4">Create Your Account</h3>
+        <p>Join the school community. No password required—just use your school email.</p>
+        
+        <a href="{{ url_for('authorize') }}" class="btn btn-primary btn-lg">
+          <img width="20px" style="margin-bottom:3px; margin-right:5px; filter: brightness(0) invert(1);" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+          Register with Google
+        </a>
+
+        <p class="mt-4 text-muted small">
+          Only <strong>@flire.com</strong> accounts are permitted to register.
+        </p>
+
       </div>
     </div>
   </div>
 </main>
 
-{% include "footer.html" %} {% endblock %}
+{% include "footer.html" %} 
+{% endblock %}

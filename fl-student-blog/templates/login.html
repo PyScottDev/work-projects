@@ -1,5 +1,4 @@
-{% from "bootstrap5/form.html" import render_form %} {% block content %} {%
-include "header.html" %}
+{% block content %} {% include "header.html" %}
 
 <!-- Page Header -->
 <header
@@ -21,11 +20,27 @@ include "header.html" %}
 <main class="mb-4">
   <div class="container">
     <div class="row">
-      <!-- TODO: add a flash message here for users registering twice -->
-       <p class="flash">{{ get_flashed_messages()[0] }}</p>
-      <div class="col-lg-8 col-md-10 mx-auto">
-        <!--TODO: render login form here-->
-        {{render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+      <div class="col-lg-8 col-md-10 mx-auto text-center">
+        
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <p class="flash" style="color: red;">{{ message }}</p>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <h3 class="mb-4">School Access Only</h3>
+        
+        <a href="{{ url_for('login') }}" class="btn btn-outline-dark btn-lg">
+          <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+          Sign in with FL Account
+        </a>
+
+        <p class="mt-4 text-muted small">
+          Please use your <strong>@your-school.ie</strong> email address to access the blog.
+        </p>
+
       </div>
     </div>
   </div>
