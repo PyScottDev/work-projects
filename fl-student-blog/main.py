@@ -108,7 +108,7 @@ class BlogPost(db.Model):
     subtitle: Mapped[str] = mapped_column(String(250), nullable=False)
     date: Mapped[str] = mapped_column(String(250), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
-    img_url: Mapped[str] = mapped_column(String(250), nullable=False)
+    img_url: Mapped[str] = mapped_column(Text, nullable=False)
     topic: Mapped[str] = mapped_column(String(100), nullable=True)
     level: Mapped[str] = mapped_column(String(100), nullable=True)
     cloudinary_public_id: Mapped[str] = mapped_column(String(500), nullable=True)
