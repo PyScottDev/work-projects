@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -8,32 +8,31 @@
     />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Angela's Blog</title>
+    <title>Student voices</title>
     {% block styles %}
     <!-- Load Bootstrap-Flask CSS here -->
     {{ bootstrap.load_css() }}
     <link
       rel="icon"
       type="image/x-icon"
-      href="{{ url_for('static', filename='assets/favicon.ico') }}"
+      href="{{ url_for('static', filename='assets/student-voices-icon.png') }}"
     />
-    <!-- Font Awesome icons (free version)-->
-    <script
-      src="https://use.fontawesome.com/releases/v6.3.0/js/all.js"
-      crossorigin="anonymous"
-    ></script>
-    <!-- Google fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic"
+      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:wght@500;700;800&display=swap"
       rel="stylesheet"
-      type="text/css"
     />
+
     <link
-      href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800"
       rel="stylesheet"
-      type="text/css"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
     <!-- Core theme CSS (includes Bootstrap)-->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
     <link
       href="{{ url_for('static', filename='css/styles.css') }}"
       rel="stylesheet"
@@ -41,10 +40,57 @@
     {% endblock %}
   </head>
   <body>
+    <div class="container mt-3 flash-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show shadow-sm border-0 mb-3"
+        role="alert"
+      >
+        <div class="d-flex align-items-center">
+          <span class="material-symbols-outlined me-2">
+            {{ 'check_circle' if category == 'success' else 'error' if category
+            == 'danger' else 'info' }}
+          </span>
+          <span>{{ message }}</span>
+        </div>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
-      <div class="container px-4 px-lg-5">
-        <a class="navbar-brand" href="/">Start Bootstrap</a>
+      <div class="container-fluid px-4">
+        <button
+          id="menuToggle"
+          class="btn btn-link text-dark text-decoration-none fs-3 lh-1 me-3"
+          type="button"
+          aria-label="Toggle sidebar"
+        >
+          ☰
+        </button>
+
+        <a
+          class="navbar-brand d-flex align-items-center gap-2"
+          href="{{ url_for('get_all_posts') }}"
+        >
+          <img
+            src="{{ url_for('static', filename='assets/img/fl-logo.svg') }}"
+            alt="Future Learning logo"
+            height="62"
+          />
+          <span class="brand-text">
+            <span class="brand-title">Student voices</span>
+            <span class="brand-tagline"
+              >Stories and reflections from our students</span
+            >
+          </span>
+        </a>
         <button
           class="navbar-toggler"
           type="button"
@@ -55,7 +101,9 @@
           aria-label="Toggle navigation"
         >
           Menu
-          <i class="fas fa-bars"></i>
+          <span class="material-symbols-outlined" style="vertical-align: middle"
+            >menu</span
+          >
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ms-auto py-4 py-lg-0">
@@ -67,7 +115,7 @@
               >
             </li>
             <!-- TODO: Only show Login/Register if user is logged out. Otherwise show "Log Out" -->
-             {% if not current_user.is_authenticated %}
+            {% if not current_user.is_authenticated %}
             <li class="nav-item">
               <a
                 class="nav-link px-lg-3 py-3 py-lg-4"
@@ -109,5 +157,178 @@
         </div>
       </div>
     </nav>
+    <div
+      class="offcanvas offcanvas-start"
+      tabindex="-1"
+      id="sidebarMenu"
+      aria-labelledby="sidebarMenuLabel"
+      data-bs-backdrop="false"
+      data-bs-scroll="true"
+    >
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="sidebarMenuLabel">Collapsible</h5>
+      </div>
+
+      <div class="offcanvas-body">
+        <ul class="list-unstyled ps-0">
+          <li class="mb-1">
+            <a
+              href="{{ url_for('get_all_posts') }}"
+              class="btn sidebar-heading sidebar-home-link d-inline-flex align-items-center rounded border-0 text-decoration-none"
+            >
+              <span class="sidebar-home-spacer" aria-hidden="true"></span>
+              <span class="material-symbols-outlined sidebar-icon">home</span>
+              <span>Home</span>
+            </a>
+          </li>
+
+          {% if current_user.is_authenticated %}
+          <li class="mb-1">
+            <button
+              class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed"
+              data-bs-toggle="collapse"
+              data-bs-target="#dashboard-collapse"
+              aria-expanded="false"
+            >
+              My stories
+            </button>
+
+            <div class="collapse" id="dashboard-collapse">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                <li>
+                  <a
+                    href="{{ url_for('user_stories', username_slug=current_user.slug) }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    My stories
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{url_for('add_new_post')}}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Create new story
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+          {% endif %}
+
+          <li class="mb-1">
+            <button
+              class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed"
+              data-bs-toggle="collapse"
+              data-bs-target="#orders-collapse"
+              aria-expanded="false"
+            >
+              Topics
+            </button>
+
+            <div class="collapse" id="orders-collapse">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                <li>
+                  <a
+                    href="{{ url_for('show_topic', topic_name='Coming to Ireland') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Coming to Ireland
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('show_topic', topic_name='Life in Ireland') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Life in Ireland
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('show_topic', topic_name='Future plans') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Future plans
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('show_topic', topic_name='Other thoughts') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Other thoughts
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          <li class="mb-1">
+            <button
+              class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed"
+              data-bs-toggle="collapse"
+              data-bs-target="#account-collapse"
+              aria-expanded="false"
+            >
+              Language level
+            </button>
+
+            <div class="collapse" id="account-collapse">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                <li>
+                  <a
+                    href="{{ url_for('show_level', level_name='Beginner') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Beginner
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('show_level', level_name='Foundation') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Foundation
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('show_level', level_name='Stage 1') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Stage 1
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('show_level', level_name='Stage 2') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Stage 2
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('show_level', level_name='Stage 3') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Stage 3
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('show_level', level_name='Stage 4') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Stage 4
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </body>
 </html>

@@ -10613,20 +10613,26 @@ blockquote {
 }
 @media (min-width: 992px) {
   #mainNav {
-    border-bottom: 1px solid transparent;
-    background: transparent;
+    border-bottom: 1px solid #dee2e6;
+    background-color: #fff;
   }
+
   #mainNav .navbar-brand {
-    color: #fff;
+    color: #212529;
   }
-  #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
-    color: rgba(255, 255, 255, 0.8);
+
+  #mainNav .navbar-brand:focus,
+  #mainNav .navbar-brand:hover {
+    color: #212529;
   }
+
   #mainNav .navbar-nav > li.nav-item > a.nav-link {
-    color: #fff;
+    color: #212529;
   }
-  #mainNav .navbar-nav > li.nav-item > a.nav-link:focus, #mainNav .navbar-nav > li.nav-item > a.nav-link:hover {
-    color: rgba(255, 255, 255, 0.8);
+
+  #mainNav .navbar-nav > li.nav-item > a.nav-link:focus,
+  #mainNav .navbar-nav > li.nav-item > a.nav-link:hover {
+    color: #0085A1;
   }
 }
 @media (min-width: 992px) {
@@ -10637,8 +10643,9 @@ blockquote {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
   }
+  /*
   #mainNav.is-fixed {
-    /* when the user scrolls down, we hide the header right above the viewport */
+    /* when the user scrolls down, we hide the header right above the viewport 
     position: fixed;
     top: -83px;
     transition: transform 0.2s;
@@ -10658,9 +10665,43 @@ blockquote {
     color: #0085A1;
   }
   #mainNav.is-visible {
-    /* if the user changes the scrolling direction, we show the header */
+    /* if the user changes the scrolling direction, we show the header 
     transform: translate3d(0, 100%, 0);
   }
+*/
+}
+#mainNav .navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+#mainNav .navbar-brand img {
+  display: block;
+  width: auto;
+  height: 44px;
+}
+
+#mainNav .brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+#mainNav .brand-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+#mainNav .brand-tagline {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  font-style: italic;
+  color: #6c757d;
 }
 
 footer {
@@ -10671,10 +10712,11 @@ footer {
 header.masthead {
   position: relative;
   margin-bottom: 3rem;
-  padding-top: calc(8rem + 57px);
-  padding-bottom: 8rem;
+  padding-top: calc(2rem + 57px) !important;
+  padding-bottom: 1rem !important;
+  min-height: 0px !important;
   background: no-repeat center center;
-  background-color: #6c757d;
+  background-color: #ffffff;
   background-size: cover;
   background-attachment: scroll;
 }
@@ -10685,7 +10727,7 @@ header.masthead:before {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #212529;
+  background-color: #ffffff;
   opacity: 0.5;
 }
 header.masthead .page-heading,
@@ -10853,3 +10895,317 @@ header.masthead .post-heading .meta a {
   color: #ee6f57;
   text-align: center;
 }
+
+/* Sidebar CSS copied from Bootcamp examples*/
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+html {
+  height: -webkit-fill-available;
+}
+
+main {
+  min-height: 100vh;
+  height: auto; 
+  max-height: none;
+  overflow-y: visible; 
+  overflow-x: hidden;
+}
+
+.dropdown-toggle { outline: 0; }
+
+.btn-toggle {
+  padding: .25rem .5rem;
+  font-weight: 600;
+  color: var(--bs-emphasis-color);
+  background-color: transparent;
+}
+.btn-toggle:hover,
+.btn-toggle:focus {
+  color: rgba(var(--bs-emphasis-color-rgb), .85);
+  background-color: var(--bs-tertiary-bg);
+}
+
+.btn-toggle::before {
+  width: 1.25em;
+  line-height: 0;
+  content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%280,0,0,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
+  transition: transform .35s ease;
+  transform-origin: .5em 50%;
+}
+
+[data-bs-theme="dark"] .btn-toggle::before {
+  content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%28255,255,255,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
+}
+
+.btn-toggle[aria-expanded="true"] {
+  color: rgba(var(--bs-emphasis-color-rgb), .85);
+}
+.btn-toggle[aria-expanded="true"]::before {
+  transform: rotate(90deg);
+}
+
+.btn-toggle-nav a {
+  padding: .1875rem .5rem;
+  margin-top: .125rem;
+  margin-left: 1.25rem;
+}
+.btn-toggle-nav a:hover,
+.btn-toggle-nav a:focus {
+  background-color: var(--bs-tertiary-bg);
+}
+
+.scrollarea {
+  overflow-y: auto;
+}
+/*End of Sidebar copy from Bootcamp*/
+
+#mainNav {
+  position: sticky !important;
+  top: 0 !important;
+  background-color: #fff !important;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* ==================================================
+   CUSTOM NAVBAR OVERRIDES
+   Medium-style student voices navbar
+   ================================================== */
+
+#mainNav {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1030;
+  background-color: #fff !important;
+  border-bottom: 1px solid #dee2e6;
+}
+
+#mainNav .navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+#mainNav .navbar-brand img {
+  display: block;
+  width: auto;
+  height: 60px !important;
+  max-height: none !important;
+}
+
+#mainNav .brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+#mainNav .brand-title {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+#mainNav .brand-tagline {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  font-style: italic;
+  color: #6c757d;
+}
+
+#mainNav .navbar-nav > li.nav-item > a.nav-link {
+  color: #212529;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+#mainNav .navbar-nav > li.nav-item > a.nav-link:hover {
+  color: #0085A1;
+}
+
+#menuToggle {
+  border: none;
+  box-shadow: none;
+  color: #212529;
+}
+
+/* Keep navbar above the sliding sidebar */
+#mainNav {
+  z-index: 1060 !important;
+}
+
+/* Make the sidebar start below the navbar */
+#sidebarMenu {
+  top: 100px;
+  height: calc(100vh - 100px);
+  width: 320px;
+  border-right: 1px solid #dee2e6;
+}
+
+/* Push main blog content when sidebar is open */
+#mainContent {
+  transition: margin-left 0.3s ease;
+}
+
+body.sidebar-open #mainContent {
+  margin-left: 320px;
+}
+
+/* ==================================================
+   RESPONSIVE SIDEBAR BEHAVIOUR
+   ================================================== */
+
+/* Desktop: sidebar pushes content */
+#mainContent {
+  transition: margin-left 0.3s ease;
+}
+
+body.sidebar-open #mainContent {
+  margin-left: 320px;
+}
+
+/* Mobile/tablet: sidebar overlays content instead of pushing it */
+@media (max-width: 991px) {
+  body.sidebar-open #mainContent {
+    margin-left: 0;
+  }
+
+  #mainContent {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  #sidebarMenu {
+    width: 280px;
+  }
+}
+
+/* ==================================================
+   RESPONSIVE SIDEBAR BEHAVIOUR END
+   ================================================== */
+
+   
+/* Sidebar Home Styling*/
+#sidebarMenu .sidebar-link {
+  padding: 0.25rem 0.5rem;
+  font-weight: 600;
+}
+
+#sidebarMenu .sidebar-link:hover {
+  background-color: var(--bs-tertiary-bg);
+}
+
+#sidebarMenu .sidebar-heading {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  font-family: "Open Sans", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #212529;
+  background-color: transparent;
+  text-align: left;
+}
+
+#sidebarMenu .sidebar-home-link {
+  color: #212529;
+}
+
+#sidebarMenu .sidebar-home-spacer {
+  width: 1.25em;
+  flex-shrink: 0;
+}
+
+#sidebarMenu .sidebar-heading:hover,
+#sidebarMenu .sidebar-heading:focus {
+  background-color: var(--bs-tertiary-bg);
+  color: #212529;
+}
+
+#sidebarMenu .sidebar-icon {
+  font-size: 1.25rem;
+  width: 1.75rem;
+  margin-right: 0.05rem;
+  line-height: 1;
+  color: #6c757d;
+}
+
+
+
+/* Custom styling for the post tags */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.8em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+}
+
+.post-meta img {
+    border: 1px solid #dee2e6;
+}
+
+/* ======================*/
+/*   Fonts Override  */
+/* ======================*/
+
+/* Apply Montserrat to all Headings and the Brand Logo */
+h1, h2, h3, h4, h5, h6, 
+.navbar-brand, 
+.btn, 
+.sidebar-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700; /* Bold for headings */
+    text-transform: none; /* Keeps it modern and not "shouty" */
+}
+
+/* Apply Lora to all Body Text for readability */
+body, .post-entry, .comment-text {
+    font-family: 'Lora', serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Specific fix for your "Student voices" logo text */
+.brand-title {
+    font-weight: 800; /* Extra thick for the main title */
+    letter-spacing: -0.5px;
+}
+
+.brand-tagline {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* Sleek Flash Messages */
+.flash-container {
+    position: fixed;
+    top: 80px; /* Sits just below your fixed navbar */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050; /* Ensure it stays above other elements */
+    width: 100%;
+    max-width: 500px; /* Keeps it from stretching too wide on desktop */
+}
+
+.alert {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border-radius: 12px; /* Softer, modern corners */
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+

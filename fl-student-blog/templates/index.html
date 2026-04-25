@@ -1,74 +1,65 @@
 {% include "header.html" %}
 
-<!-- Page Header-->
-<header
-  class="masthead"
-  style="background-image: url('../static/assets/img/home-bg.jpg')"
->
-  <div class="container position-relative px-4 px-lg-5">
-
-    <div class="container">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} text-center" role="alert">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-</div>
-
-    <div class="row gx-4 gx-lg-5 justify-content-center">
-      <div class="col-md-10 col-lg-8 col-xl-7">
-        <div class="site-heading">
-          <h1>Angela's Blog</h1>
-          <span class="subheading">A collection of random musings.</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</header>
-<!-- Main Content-->
-<div class="container px-4 px-lg-5">
-  <div class="row gx-4 gx-lg-5 justify-content-center">
-    <div class="col-md-10 col-lg-8 col-xl-7">
-      <!-- Post preview-->
+<div class="container mt-5">
+  <div class="row">
+    <main id="mainContent" class="col-md-9 ps-5">
       {% for post in all_posts %}
-      <div class="post-preview">
-        <a href="{{ url_for('show_post', post_id=post.id) }}">
-          <h2 class="post-title">{{ post.title }}</h2>
-          <h3 class="post-subtitle">{{ post.subtitle }}</h3>
-        </a>
-        <p class="post-meta">
-          Posted by
-          <a href="#">{{post.author.name}}</a>
-          on {{post.date}}
-          <!-- TODO: Only show delete button if user id is 1 (admin user) -->
-          {% if current_user.id == 1 %}
-            <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
-          {% endif %}
-        </p>
+      <div class="row mb-5 align-items-center">
+        <div class="col-8">
+          <a
+            href="{{ url_for('show_post', post_id=post.id) }}"
+            class="text-decoration-none text-dark"
+          >
+            <h2 class="fw-bold">{{ post.title }}</h2>
+            <h3 class="h6 text-muted">{{ post.subtitle }}</h3>
+          </a>
+          <div class="post-meta d-flex align-items-center flex-wrap gap-2 mb-3">
+            <img
+              src="{{ post.author.img_url }}"
+              alt="{{ post.author.name }}"
+              class="rounded-circle border"
+              style="width: 35px; height: 35px; object-fit: cover"
+            />
+
+            <span class="text-muted small">
+              <a
+                href="{{ url_for('user_stories', username_slug=post.author.slug) }}"
+                class="text-decoration-none fw-bold text-dark"
+              >
+                {{ post.author.name }}
+              </a>
+               {{ post.date }}
+            </span>
+
+            <span class="badge rounded-pill bg-primary text-light px-3">
+              {{ post.topic }}
+            </span>
+
+            <span class="badge rounded-pill bg-secondary text-light px-3">
+              {{ post.level }}
+            </span>
+
+            {% if current_user.id == 1 %}
+            <a
+              href="{{ url_for('delete_post', post_id=post.id) }}"
+              class="ms-auto text-danger"
+            >
+              <i class="fas fa-trash-alt"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-4">
+          <img
+            src="{{ get_signed_url(post.cloudinary_public_id) or post.img_url }}"
+            class="img-fluid rounded"
+            alt="Post Image"
+          />
+        </div>
       </div>
-      <!-- Divider-->
-      <hr class="my-4" />
+      <hr />
       {% endfor %}
-
-      <!-- New Post -->
-      <!-- TODO: Only show Create Post button if user id is 1 (admin user) -->
-      <div class="d-flex justify-content-end mb-4">
-        <a
-          class="btn btn-primary float-right"
-          href="{{url_for('add_new_post')}}"
-          >Create New Post</a
-        >
-      </div>
-
-      <!-- Pager-->
-      <div class="d-flex justify-content-end mb-4">
-        <a class="btn btn-secondary text-uppercase" href="#!">Older Posts →</a>
-      </div>
-    </div>
+    </main>
   </div>
 </div>
 

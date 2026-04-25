@@ -2,22 +2,17 @@
 include "header.html" %}
 
 <!-- Page Header -->
-<header
-  class="masthead"
-  style="background-image: url('../static/assets/img/edit-bg.jpg')"
->
+<header class="py-5 bg-white border-bottom mb-5">
   <div class="container position-relative px-4 px-lg-5">
     <div class="row gx-4 gx-lg-5 justify-content-center">
-      <div class="col-md-10 col-lg-8 col-xl-7">
-        <div class="page-heading">
-          {% if is_edit: %}
-          <h1>Edit Post</h1>
-          {% else: %}
-          <h1>New Post</h1>
+      <div class="col-md-10 col-lg-8 text-center">
+        <div class="page-heading text-dark">
+          {% if is_edit %}
+          <h1 class="fw-bold display-4">Edit Post</h1>
+          {% else %}
+          <h1 class="fw-bold display-4">New Post</h1>
           {% endif %}
-          <span class="subheading"
-            >You're going to make a great blog post!</span
-          >
+          <p class="lead text-muted mt-3">Feel free to make any changes</p>
         </div>
       </div>
     </div>
@@ -28,8 +23,22 @@ include "header.html" %}
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto">
-        {{ ckeditor.load() }} {{ ckeditor.config(name='body') }} {{
-        render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+
+          <script>
+            document.addEventListener("DOMContentLoaded", function () {
+              ClassicEditor.create(document.querySelector("#body")).catch(
+                (error) => {
+                  console.error(error);
+                },
+              );
+            });
+          </script>
+
+          {{ render_form(form, novalidate=True, button_map={"submit":
+          "primary"}, enctype="multipart/form-data") }}
+        </div>
       </div>
     </div>
   </div>
