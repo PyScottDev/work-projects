@@ -39,12 +39,12 @@
               {{ post.level }}
             </span>
 
-            {% if current_user.id == 1 %}
+            {% if current_user.email == "scottsomerville@flireland.com" or current_user.id == post.author_id %}
             <a
               href="{{ url_for('delete_post', post_id=post.id) }}"
               class="ms-auto text-danger"
             >
-              <i class="fas fa-trash-alt"></i>
+              <span class="material-symbols-outlined" style="vertical-align: middle;">delete</span>
             </a>
             {% endif %}
           </div>

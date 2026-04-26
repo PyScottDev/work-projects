@@ -11046,8 +11046,9 @@ main {
 #sidebarMenu {
   top: 100px;
   height: calc(100vh - 100px);
-  width: 320px;
+  width: 260px;
   border-right: 1px solid #dee2e6;
+  transition: transform 0.3s ease;
 }
 
 
@@ -11058,10 +11059,14 @@ main {
 /* Desktop: sidebar pushes content */
 #mainContent {
   transition: margin-left 0.3s ease;
+  width: 0.3s ease;
 }
 
-body.sidebar-open #mainContent {
-  margin-left: 320px;
+@media (min-width: 992px) {
+  body.sidebar-open #mainContent {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
 }
 
 /* Mobile/tablet: sidebar overlays content instead of pushing it */
@@ -11070,14 +11075,34 @@ body.sidebar-open #mainContent {
     margin-left: 0;
   }
 
+  @media (min-width: 992px) {
+  body.sidebar-open #mainContent {
+    margin-left: 260px;
+    width: calc(100% - 260px); /* This stops the 'sliding under' annoyance */
+  }
+}
+
+/* Mobile/tablet: sidebar overlays content instead of pushing it */
+@media (max-width: 991px) {
+  body.sidebar-open #mainContent {
+    margin-left: 0 !important; /* Force it to stay at the edge */
+    width: 100% !important;   /* Force it to stay full width */
+  }
+}
+
   #mainContent {
     padding-left: 1rem;
     padding-right: 1rem;
   }
 
   #sidebarMenu {
-    width: 280px;
+    width: 260px;
   }
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
 }
 
 /* ==================================================

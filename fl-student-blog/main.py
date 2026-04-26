@@ -329,7 +329,7 @@ def edit_post(post_id):
 @login_required
 def delete_post(post_id):
     post_to_delete = db.get_or_404(BlogPost, post_id)
-    if current_user.id != post.author_id and current_user.email != "scottsomerville@flireland.com":
+    if current_user.id != post_to_delete.author_id and current_user.email != "scottsomerville@flireland.com":
         return abort(403)
     if post_to_delete.cloudinary_public_id:
         cloudinary.uploader.destroy(
