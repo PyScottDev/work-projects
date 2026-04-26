@@ -11050,14 +11050,6 @@ main {
   border-right: 1px solid #dee2e6;
 }
 
-/* Push main blog content when sidebar is open */
-#mainContent {
-  transition: margin-left 0.3s ease;
-}
-
-body.sidebar-open #mainContent {
-  margin-left: 320px;
-}
 
 /* ==================================================
    RESPONSIVE SIDEBAR BEHAVIOUR

@@ -1,11 +1,11 @@
 {% include "header.html" %}
 
-<div class="container mt-5">
+<div class="container mt-3 mt-md-5">
   <div class="row">
-    <main id="mainContent" class="col-md-9 ps-5">
+    <main id="mainContent" class="col-12 col-md-9 ps-3 ps-md-5">
       {% for post in all_posts %}
       <div class="row mb-5 align-items-center">
-        <div class="col-8">
+        <div class="col-12 col-lg-8 order-2 order-lg-1">
           <a
             href="{{ url_for('show_post', post_id=post.id) }}"
             class="text-decoration-none text-dark"
@@ -13,7 +13,7 @@
             <h2 class="fw-bold">{{ post.title }}</h2>
             <h3 class="h6 text-muted">{{ post.subtitle }}</h3>
           </a>
-          <div class="post-meta d-flex align-items-center flex-wrap gap-2 mb-3">
+          <div class="post-meta d-flex align-items-center flex-wrap gap-2 mb-1 mb-md-3">
             <img
               src="{{ post.author.img_url }}"
               alt="{{ post.author.name }}"
@@ -49,7 +49,7 @@
             {% endif %}
           </div>
         </div>
-        <div class="col-4">
+        <div class="col-12 col-lg-4 order-1 order-lg-2 mb-3 mb-lg-0">
           <img
             src="{{ get_signed_url(post.cloudinary_public_id) or post.img_url }}"
             class="img-fluid rounded"
