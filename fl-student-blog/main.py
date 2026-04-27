@@ -249,6 +249,7 @@ def show_post(post_id):
         )
         db.session.add(new_comment)
         db.session.commit()
+        return redirect(url_for('show_post', post_id=post_id))
     requested_post = db.get_or_404(BlogPost, post_id)
     return render_template("post.html", post=requested_post, image=display_image, form=comment_form)
 
@@ -340,6 +341,34 @@ def delete_post(post_id):
     db.session.commit()
     return redirect(url_for('get_all_posts'))
 
+
+@app.route("/edit-comment/<int:comment_id>", methods=["GET", "POST"])
+@login_required
+def edit_comment(comment_id):
+    comment = db.get_or_404(Comment, comment_id)
+    if current_user.id != comment.author_id and current_user.email != "scottsomerville@flireland.com":
+        return abort(403)
+    requested_post = comment.parent_post
+    display_image = get_signed_url(requested_post.cloudinary_public_id) or requested_post.img_url
+    edit_form = CommentForm(comment=comment.text)
+    if edit_form.validate_on_submit():
+        comment.text = edit_form.comment.data
+        db.session.commit()
+        return redirect(url_for('show_post', post_id=comment.post_id))
+        
+    return render_template("post.html", post=comment.parent_post, image=display_image, form=edit_form, is_edit=True)
+
+@app.route("/delete-comment/<int:comment_id>")
+@login_required
+def delete_comment(comment_id):
+    comment_to_delete = db.get_or_404(Comment, comment_id)
+    post_id = comment_to_delete.post_id
+    if current_user.id != comment_to_delete.author_id and current_user.email != "scottsomerville@flireland.com":
+        return abort(403)
+        
+    db.session.delete(comment_to_delete)
+    db.session.commit()
+    return redirect(url_for('show_post', post_id=post_id))
 
 @app.route("/about")
 def about():

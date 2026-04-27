@@ -6,29 +6,20 @@
       {% for post in all_posts %}
       <div class="row mb-5 align-items-center">
         <div class="col-12 col-lg-8 order-2 order-lg-1">
-          <a
-            href="{{ url_for('show_post', post_id=post.id) }}"
-            class="text-decoration-none text-dark"
-          >
+          <a href="{{ url_for('show_post', post_id=post.id) }}" class="text-decoration-none text-dark">
             <h2 class="fw-bold">{{ post.title }}</h2>
             <h3 class="h6 text-muted">{{ post.subtitle }}</h3>
           </a>
           <div class="post-meta d-flex align-items-center flex-wrap gap-2 mb-1 mb-md-3">
-            <img
-              src="{{ post.author.img_url }}"
-              alt="{{ post.author.name }}"
-              class="rounded-circle border"
-              style="width: 35px; height: 35px; object-fit: cover"
-            />
+            <img src="{{ post.author.img_url }}" alt="{{ post.author.name }}" class="rounded-circle border"
+              style="width: 35px; height: 35px; object-fit: cover" />
 
             <span class="text-muted small">
-              <a
-                href="{{ url_for('user_stories', username_slug=post.author.slug) }}"
-                class="text-decoration-none fw-bold text-dark"
-              >
+              <a href="{{ url_for('user_stories', username_slug=post.author.slug) }}"
+                class="text-decoration-none fw-bold text-dark">
                 {{ post.author.name }}
               </a>
-               {{ post.date }}
+              {{ post.date }}
             </span>
 
             <span class="badge rounded-pill bg-primary text-light px-3">
@@ -40,21 +31,17 @@
             </span>
 
             {% if current_user.email == "scottsomerville@flireland.com" or current_user.id == post.author_id %}
-            <a
-              href="{{ url_for('delete_post', post_id=post.id) }}"
-              class="ms-auto text-danger"
-            >
-              <span class="material-symbols-outlined" style="vertical-align: middle;">delete</span>
-            </a>
+            <button type="button" class="ms-auto text-danger btn btn-link p-0 border-0" data-bs-toggle="modal"
+              data-bs-target="#deleteModal" data-postid="{{ post.id }}" data-posttitle="{{ post.title }}"
+              style="vertical-align: middle;">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
             {% endif %}
           </div>
         </div>
         <div class="col-12 col-lg-4 order-1 order-lg-2 mb-3 mb-lg-0">
-          <img
-            src="{{ get_signed_url(post.cloudinary_public_id) or post.img_url }}"
-            class="img-fluid rounded"
-            alt="Post Image"
-          />
+          <img src="{{ get_signed_url(post.cloudinary_public_id) or post.img_url }}" class="img-fluid rounded"
+            alt="Post Image" />
         </div>
       </div>
       <hr />
@@ -62,5 +49,42 @@
     </main>
   </div>
 </div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" data-bs-target="#deleteModal"
+          aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete "<strong><span id="postTitleToConfirm"></span></strong>"? This action is
+        permanent.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" href="#" class="btn btn-danger">Delete Post</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', event => {
+      const button = event.relatedTarget;
+      const postId = button.getAttribute('data-postid');
+      const postTitle = button.getAttribute('data-posttitle');
+
+      const modalTitleSpan = deleteModal.querySelector('#postTitleToConfirm');
+      const confirmBtn = deleteModal.querySelector('#confirmDeleteBtn');
+
+      modalTitleSpan.textContent = postTitle;
+      confirmBtn.href = '/delete/' + postId;
+    });
+  }
+</script>
 
 {% include "footer.html" %}
