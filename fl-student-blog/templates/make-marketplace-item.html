@@ -1,0 +1,46 @@
+{% from "bootstrap5/form.html" import render_form %} {% block content %} {%
+include "header.html" %}
+
+<!-- Page Header -->
+<header class="py-5 bg-white border-bottom mb-5">
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 text-center">
+        <div class="page-heading text-dark">
+          {% if is_edit %}
+          <h1 class="fw-bold display-4">Edit Item</h1>
+          {% else %}
+          <h1 class="fw-bold display-4">New Item</h1>
+          {% endif %}
+          <p class="lead text-muted mt-3">Write in all the details of your item</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="mb-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+
+          <script>
+            document.addEventListener("DOMContentLoaded", function () {
+              ClassicEditor.create(document.querySelector("#decription")).catch(
+                (error) => {
+                  console.error(error);
+                },
+              );
+            });
+          </script>
+
+          {{ render_form(form, novalidate=True, button_map={"submit":
+          "primary"}, enctype="multipart/form-data") }}
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% include "footer.html" %} {% endblock %}

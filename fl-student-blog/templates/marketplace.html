@@ -1,0 +1,91 @@
+{% include "header.html" %}
+
+<div class="container mt-3 mt-md-5">
+  <div class="row">
+    <main id="mainContent" class="col-12 col-md-9 ps-3 ps-md-5">
+      {% for post in all_posts %}
+      <div class="row mb-5 align-items-center">
+        <div class="col-12 col-lg-8 order-2 order-lg-1">
+          <a
+            href="{{ url_for('show_item', item_id=post.id) }}"
+            class="text-decoration-none text-dark"
+          >
+            <h2 class="fw-bold">{{ post.title }}</h2>
+            {% if post.price %}
+            <h3 class="h6 text-muted">€{{ "%.2f"|format(post.price) }}</h3>
+            {% else %}
+            <h3 class="h6 text-muted">Free</h3>
+            {% endif %}
+          </a>
+          <div
+            class="post-meta d-flex align-items-center flex-wrap gap-2 mb-1 mb-md-3"
+          >
+            <img
+              src="{{ post.seller_id.img_url }}"
+              alt="{{ post.seller_id.name }}"
+              class="rounded-circle border"
+              style="width: 35px; height: 35px; object-fit: cover"
+            />
+
+            <span class="text-muted small">
+              <a
+                href="{{ url_for('user_items', username_slug=post.seller.slug) }}"
+                class="text-decoration-none fw-bold text-dark"
+              >
+                {{ post.seller_id.name }}
+              </a>
+              {{ post.date }}
+            </span>
+
+            <span class="badge rounded-pill bg-primary text-light px-3">
+              {{ post.category }}
+            </span>
+
+            <span class="badge rounded-pill bg-secondary text-light px-3">
+              {{ post.condition }}
+            </span>
+
+            {% if current_user.email == "scottsomerville@flireland.com" or
+            current_user.id == post.seller_id %}
+            <a
+              href="{{ url_for('toggle_item_availability', item_id=post.id) }}"
+              class="ms-auto {% if post.available %}text-warning{% else %}text-success{% endif %}"
+              title="{% if post.available %}Mark unavailable{% else %}Make available again{% endif %}"
+              onclick="
+                return confirm(
+                  '{% if post.available %}Mark this item as unavailable? It will disappear from the main marketplace, but you can make it available again from your items page.{% else %}Make this item available again? It will appear in the main marketplace.{% endif %}',
+                );
+              "
+            >
+              {% if post.available %}
+              <span
+                class="material-symbols-outlined"
+                style="vertical-align: middle"
+                >visibility_off</span
+              >
+              {% else %}
+              <span
+                class="material-symbols-outlined"
+                style="vertical-align: middle"
+                >visibility</span
+              >
+              {% endif %}
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-12 col-lg-4 order-1 order-lg-2 mb-3 mb-lg-0">
+          <img
+            src="{{ get_signed_url(post.image_1_public_id) or url_for('static', filename='assets/img/marketplace-placeholder.jpg') }}"
+            class="img-fluid rounded"
+            alt="Post Image"
+          />
+        </div>
+      </div>
+      <hr />
+      {% endfor %}
+    </main>
+  </div>
+</div>
+
+{% include "footer.html" %}

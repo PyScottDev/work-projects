@@ -15,7 +15,9 @@ import cloudinary.uploader
 import cloudinary.utils
 import time
 from datetime import timedelta
-from forms import CreatePostForm, CommentForm
+
+from forms import CreatePostForm, CommentForm, CreateNewMarketplace
+from models import db, BlogPost, User, Comment, MarketplaceItem, MarketplaceComment
 
 load_dotenv()
 
@@ -73,10 +75,6 @@ Bootstrap5(app)
 
 
 
-class Base(DeclarativeBase):
-    pass
-
-
 
 db_url = os.getenv("DATABASE_URL", f"postgresql://postgres:{os.getenv('DB_PASSWORD')}@localhost:5432/blog_db")
 if db_url and db_url.startswith("postgres://"):
@@ -87,46 +85,10 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "pool_pre_ping": True,
     "pool_recycle": 300, 
 }
-db = SQLAlchemy(model_class=Base)
+
 db.init_app(app)
 
 
-class User(UserMixin, db.Model):
-    __tablename__ = "user"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    google_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)    
-    name: Mapped[str] = mapped_column(String(100), nullable=False) 
-    img_url: Mapped[str] = mapped_column(String(500), nullable=True)
-    slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=True)
-    posts = relationship("BlogPost", back_populates="author")
-    comments = relationship("Comment", back_populates="comment_author")
-    
-
-class BlogPost(db.Model):
-    __tablename__ = "blog_posts"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True) 
-    author_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user.id"), nullable=False)
-    author = relationship("User", back_populates="posts")
-    title: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
-    subtitle: Mapped[str] = mapped_column(String(250), nullable=False)
-    date: Mapped[str] = mapped_column(String(250), nullable=False)
-    body: Mapped[str] = mapped_column(Text, nullable=False)
-    img_url: Mapped[str] = mapped_column(Text, nullable=False)
-    topic: Mapped[str] = mapped_column(String(100), nullable=True)
-    level: Mapped[str] = mapped_column(String(100), nullable=True)
-    cloudinary_public_id: Mapped[str] = mapped_column(String(500), nullable=True)
-    comments = relationship("Comment", back_populates="parent_post")
-
-
-class Comment(db.Model):
-    __tablename__ = "comment"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True) 
-    text: Mapped[str] = mapped_column(String(500), nullable=False)
-    author_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user.id"), nullable=False)
-    comment_author = relationship("User", back_populates="comments")
-    post_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("blog_posts.id"), nullable=False)
-    parent_post = relationship("BlogPost", back_populates="comments")
 
 
 
@@ -213,7 +175,10 @@ def logout():
 
 @app.route('/')
 def get_all_posts():
-    result = db.session.execute(db.select(BlogPost).order_by(BlogPost.id.desc()))
+    result = db.session.execute(
+        db.select(BlogPost).
+        order_by(BlogPost.id.desc())
+        )
     posts = result.scalars().all()
     return render_template("index.html", all_posts=posts)
 
@@ -222,17 +187,32 @@ def user_stories(username_slug):
     user = db.session.execute(db.select(User).where(User.slug == username_slug)).scalar()
     if not user:
         return abort(404)
-    return render_template("index.html", all_posts=user.posts, profile_user=user)
+    
+    result = db.session.execute(
+        db.select(BlogPost)
+        .where(BlogPost.author_id == user.id)
+        .order_by(BlogPost.id.desc())
+    )
+    posts = result.scalars().all()
+    return render_template("index.html", all_posts=posts, profile_user=user)
 
 @app.route("/topic/<topic_name>")
 def show_topic(topic_name):
-    result = db.session.execute(db.select(BlogPost).where(BlogPost.topic == topic_name))
+    result = db.session.execute(
+        db.select(BlogPost)
+        .where(BlogPost.topic == topic_name)
+        .order_by(BlogPost.id.desc())
+        )
     posts = result.scalars().all()
     return render_template("index.html", all_posts=posts, category_name=topic_name)
 
 @app.route("/level/<level_name>")
 def show_level(level_name):
-    result = db.session.execute(db.select(BlogPost).where(BlogPost.level == level_name))
+    result = db.session.execute(
+        db.select(BlogPost)
+        .where(BlogPost.level == level_name)
+        .order_by(BlogPost.id.desc())
+        )
     posts = result.scalars().all()
     return render_template("index.html", all_posts=posts, category_name=level_name)
 
@@ -373,6 +353,174 @@ def delete_comment(comment_id):
     db.session.delete(comment_to_delete)
     db.session.commit()
     return redirect(url_for('show_post', post_id=post_id))
+
+
+
+# Marketplace Routes
+
+@app.route('/marketplace')
+@login_required
+def for_sale():
+    result = db.session.execute(
+        db.select(MarketplaceItem)
+        .where(MarketplaceItem.available == True)
+        .order_by(MarketplaceItem.id.desc()))
+    marketplace_items = result.scalars().all()
+    return render_template("marketplace.html", all_posts=marketplace_items)
+
+@app.route("/marketplace/<username_slug>")
+@login_required
+def user_items(username_slug):
+    seller = db.session.execute(
+        db.select(User).where(User.slug == username_slug)
+    ).scalar()
+    if not seller:
+        return abort(404)
+    
+    items = db.session.execute(
+        db.select(MarketplaceItem)
+        .where(MarketplaceItem.seller_id == seller.id)
+        .order_by(MarketplaceItem.id.desc())
+        ).scalars().all()
+    
+    return render_template("marketplace.html", all_posts=items, profile_user=seller)
+
+def upload_marketplace_image(image_file):
+    if not image_file:
+        return None
+
+    upload_result = cloudinary.uploader.upload(
+        image_file,
+        type="authenticated",
+        folder="student_marketplace_uploads/"
+    )
+
+    return upload_result["public_id"]
+
+@app.route("/marketplace/<int:item_id>", methods=["GET", "POST"])
+@login_required
+def show_item(item_id):
+    requested_item = db.get_or_404(MarketplaceItem, item_id)
+    image_ids = [
+        requested_item.image_1_public_id,
+        requested_item.image_2_public_id,
+        requested_item.image_3_public_id,
+    ]
+
+    images = [
+        get_signed_url(image_id)
+        for image_id in image_ids
+        if image_id
+    ]
+    comment_form = CommentForm()
+    if comment_form.validate_on_submit():
+        if not current_user.is_authenticated:
+            flash("You need to login or register to comment.")
+            return redirect(url_for("login"))
+
+        new_comment = MarketplaceComment(
+            text=comment_form.comment.data,
+            comment_author=current_user,
+            parent_item=requested_item
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        return redirect(url_for("show_item", item_id=requested_item.id))
+    
+    return render_template(
+        "item.html",
+        post=requested_item,
+        images=images,
+        form=comment_form
+        )
+
+
+@app.route("/marketplace/new-item", methods=["GET", "POST"])
+@login_required
+def add_new_item():
+    form = CreateNewMarketplace()
+    if form.validate_on_submit():
+        image_1_public_id = upload_marketplace_image(form.image_1.data)
+        image_2_public_id = upload_marketplace_image(form.image_2.data)
+        image_3_public_id = upload_marketplace_image(form.image_3.data)
+        img_url = form.img_url.data or "https://images.unsplash.com/photo-1432821596592-e2c18b78144f"
+        public_id = None
+            
+        new_item = MarketplaceItem(
+            title=form.title.data,
+            description=form.description.data,
+            price=form.price.data,
+            condition=form.condition.data,
+            category=form.category.data,
+            image_1_public_id=image_1_public_id,
+            image_2_public_id=image_2_public_id,
+            image_3_public_id=image_3_public_id,
+            seller=current_user,
+            date=date.today().strftime("%B %d, %Y"),
+            available=True,
+        )
+        db.session.add(new_item)
+        db.session.commit()
+        return redirect(url_for("for_sale"))
+    return render_template("make-marketplace-item.html", form=form)
+
+@app.route("/marketplace/<int:item_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_item(item_id):
+    item = db.get_or_404(MarketplaceItem, item_id)
+    if current_user.id != item.seller_id and current_user.email != "scottsomerville@flireland.com":
+        return abort(403)
+    edit_form = CreateNewMarketplace(
+        title=item.title,
+        description=item.description,
+        price=item.price,
+        condition=item.condition,
+        category=item.category,
+    )
+    if edit_form.validate_on_submit():
+        item.title = edit_form.title.data
+        item.description = edit_form.description.data
+        item.price = edit_form.price.data
+        item.condition = edit_form.condition.data
+        item.category = edit_form.category.data
+
+        if edit_form.image_1.data:
+            if item.image_1_public_id:
+                cloudinary.uploader.destroy(item.image_1_public_id, type="authenticated")
+            item.image_1_public_id = upload_marketplace_image(edit_form.image_1.data)
+
+        if edit_form.image_2.data:
+            if item.image_2_public_id:
+                cloudinary.uploader.destroy(item.image_2_public_id, type="authenticated")
+            item.image_2_public_id = upload_marketplace_image(edit_form.image_2.data)
+
+        if edit_form.image_3.data:
+            if item.image_3_public_id:
+                cloudinary.uploader.destroy(item.image_3_public_id, type="authenticated")
+            item.image_3_public_id = upload_marketplace_image(edit_form.image_3.data)
+
+        
+        db.session.commit()
+        return redirect(url_for("show_item", item_id=item.id))
+    return render_template("make-marketplace-item.html", form=edit_form, is_edit=True)
+
+@app.route("/marketplace/item/<int:item_id>/toggle-availability")
+@login_required
+def toggle_item_availability(item_id):
+    item = db.get_or_404(MarketplaceItem, item_id)
+
+    if current_user.id != item.seller_id and current_user.email != "scottsomerville@flireland.com":
+        return abort(403)
+
+    item.available = not item.available
+    db.session.commit()
+
+    if item.available:
+        flash("Item is available again.", "success")
+    else:
+        flash("Item marked as unavailable.", "success")
+
+    return redirect(url_for("user_items", username_slug=item.seller.slug))
 
 @app.route("/about")
 def about():

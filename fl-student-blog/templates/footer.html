@@ -72,6 +72,22 @@
 
             desktopBreakpoint.addEventListener("change", setInitialSidebarState);
             }
+            
+            document.addEventListener("click", function (event) {
+            const isDesktop = desktopBreakpoint.matches;
+            const sidebarIsOpen = sidebarElement.classList.contains("show");
+            const clickedInsideSidebar = sidebarElement.contains(event.target);
+            const clickedMenuButton = menuButton.contains(event.target);
+
+            if (
+                !isDesktop &&
+                sidebarIsOpen &&
+                !clickedInsideSidebar &&
+                !clickedMenuButton
+            ) {
+                sidebar.hide();
+            }
+            });
         </script>
   </body>
 </html>

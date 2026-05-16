@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, TextAreaField
+from wtforms import StringField, SubmitField, SelectField, TextAreaField, FloatField
 from flask_wtf.file import FileField, FileAllowed
-from wtforms.validators import DataRequired, URL
+from wtforms.validators import DataRequired, URL, Optional, NumberRange
 from flask_ckeditor import CKEditorField
 
 
@@ -36,3 +36,42 @@ class CommentForm(FlaskForm):
     comment = TextAreaField("Comment", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
+
+class CreateNewMarketplace(FlaskForm):
+    title = StringField("Item Title", validators=[DataRequired()])
+    description = CKEditorField("Description", validators=[DataRequired()])
+
+    category = SelectField("Category", choices=[
+    ("Free stuff", "Free stuff"),
+    ("Furniture", "Furniture"),
+    ("Kitchen", "Kitchen"),
+    ("Electronics", "Electronics"),
+    ("Books", "Books"),
+    ("Clothes", "Clothes"),
+    ("Bike", "Bike"),
+    ("Bags and luggage", "Bags and luggage"),
+    ("Homeware", "Homeware"),
+    ("Other", "Other"),
+    ])
+    condition = SelectField("Condition", choices=[
+    ("New", "New"),
+    ("Like new", "Like new"),
+    ("Good", "Good"),
+    ("Ok", "Ok"),
+    ("Needs repair", "Needs repair"),
+    ("Not applicable", "Not applicable"),
+    ])
+    
+    price = FloatField("Price", validators=[Optional(), NumberRange(min=0, message="Price cannot be negative.")])
+    
+    img_url = StringField("Blog Image URL (Optional)")
+    image_1 = FileField("Main image", validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
+    ])
+    image_2 = FileField("Main image", validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
+    ])
+    image_3 = FileField("Main image", validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
+    ])
+    submit = SubmitField("Submit Item")

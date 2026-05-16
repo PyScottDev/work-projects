@@ -68,7 +68,7 @@
       <div class="container-fluid ps-0 pe-2 d-flex flex-nowrap align-items-center">
         <button
           id="menuToggle"
-          class="btn btn-link text-dark text-decoration-none p-1 ms-2 ps-md-4 pe-md-3 me-1 mx-md-2
+          class="btn btn-link text-dark text-decoration-none p-1 ms-2 ps-md-4 pe-md-3 me-1 mx-md-2"
           type="button"
           aria-label="Toggle sidebar"
         >
@@ -169,7 +169,7 @@
       data-bs-scroll="true"
     >
       <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title" id="sidebarMenuLabel">Collapsible</h5>
+        <h5 class="offcanvas-title" id="sidebarMenuLabel">Menu</h5>
       </div>
 
       <div class="offcanvas-body">
@@ -330,6 +330,49 @@
               </ul>
             </div>
           </li>
+
+          {% if current_user.is_authenticated %}
+          <li class="mb-1">
+            <button
+              class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed"
+              data-bs-toggle="collapse"
+              data-bs-target="#marketplace-collapse"
+              aria-expanded="false"
+            >
+              Student Marketplace
+            </button>
+
+            <div class="collapse" id="marketplace-collapse">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                <li>
+                  <a
+                    href="{{ url_for('for_sale') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    For sale
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{ url_for('user_items', username_slug=current_user.slug) }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    My items
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="{{url_for('add_new_item')}}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Add new item
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+          {% endif %}
+
           <ul class="list-unstyled d-lg-none border-bottom pb-3 mb-3">
         
           <li>

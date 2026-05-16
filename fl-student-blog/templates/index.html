@@ -10,9 +10,15 @@
             <h2 class="fw-bold">{{ post.title }}</h2>
             <h3 class="h6 text-muted">{{ post.subtitle }}</h3>
           </a>
-          <div class="post-meta d-flex align-items-center flex-wrap gap-2 mb-1 mb-md-3">
-            <img src="{{ post.author.img_url }}" alt="{{ post.author.name }}" class="rounded-circle border"
-              style="width: 35px; height: 35px; object-fit: cover" />
+          <div
+            class="post-meta d-flex align-items-center flex-wrap gap-2 mb-1 mb-md-3"
+          >
+            <img
+              src="{{ post.author.img_url }}"
+              alt="{{ post.author.name }}"
+              class="rounded-circle border"
+              style="width: 35px; height: 35px; object-fit: cover"
+            />
 
             <span class="text-muted small">
               <a href="{{ url_for('user_stories', username_slug=post.author.slug) }}"
@@ -55,7 +61,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" data-bs-target="#deleteModal"
+        <button type="button" class="btn-close" data-bs-dismiss="modal" data-bs-target="modal"
           aria-label="Close"></button>
       </div>
       <div class="modal-body">
