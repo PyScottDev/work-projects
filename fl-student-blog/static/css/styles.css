@@ -11226,3 +11226,32 @@ body, .post-entry, .comment-text {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Goolge Slides resize */
+
+.project-embed {
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(63, 69, 81, 0.16);
+}
+
+.project-embed iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0;
+  display: block;
+}
+
+@media (max-width: 576px) {
+  .project-embed {
+    max-width: 100%;
+    border-radius: 4px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Goolge Slides resize end */

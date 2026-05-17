@@ -65,7 +65,9 @@
     </div>
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
-      <div class="container-fluid ps-0 pe-2 d-flex flex-nowrap align-items-center">
+      <div
+        class="container-fluid ps-0 pe-2 d-flex flex-nowrap align-items-center"
+      >
         <button
           id="menuToggle"
           class="btn btn-link text-dark text-decoration-none p-1 ms-2 ps-md-4 pe-md-3 me-1 mx-md-2"
@@ -173,7 +175,6 @@
       </div>
 
       <div class="offcanvas-body">
-        
         <ul class="list-unstyled ps-0">
           <li class="mb-1">
             <a
@@ -331,6 +332,50 @@
             </div>
           </li>
 
+          <li class="mb-1">
+            <button
+              class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed"
+              data-bs-toggle="collapse"
+              data-bs-target="#projects-collapse"
+              aria-expanded="false"
+            >
+              Projects
+            </button>
+
+            <div class="collapse" id="projects-collapse">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                <li>
+                  <a
+                    href="{{ url_for('get_all_projects') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    All projects
+                  </a>
+                </li>
+
+                {% if current_user.is_authenticated %}
+                <li>
+                  <a
+                    href="{{ url_for('user_projects', username_slug=current_user.slug) }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    My projects
+                  </a>
+                </li>
+
+                <li>
+                  <a
+                    href="{{ url_for('add_new_project') }}"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded"
+                  >
+                    Add new project
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </div>
+          </li>
+
           {% if current_user.is_authenticated %}
           <li class="mb-1">
             <button
@@ -374,28 +419,31 @@
           {% endif %}
 
           <ul class="list-unstyled d-lg-none border-bottom pb-3 mb-3">
-        
-          <li>
-            <a class="btn sidebar-heading d-inline-flex align-items-center rounded border-0 text-decoration-none" href="{{ url_for('about') }}"
-              >About</a
-            >
-          </li>
-          {% if current_user.is_authenticated %}
-          <li>
-            <a
-              class="btn sidebar-heading d-inline-flex align-items-center rounded border-0 text-decoration-none"
-              href="{{ url_for('logout') }}"
-              >Log Out</a
-            >
-          </li>
-          {% else %}
-          <li>
-            <a class="btn sidebar-heading d-inline-flex align-items-center rounded border-0 text-decoration-none" href="{{ url_for('login') }}"
-              >Login</a
-            >
-          </li>
-          {% endif %}
-        </ul>
+            <li>
+              <a
+                class="btn sidebar-heading d-inline-flex align-items-center rounded border-0 text-decoration-none"
+                href="{{ url_for('about') }}"
+                >About</a
+              >
+            </li>
+            {% if current_user.is_authenticated %}
+            <li>
+              <a
+                class="btn sidebar-heading d-inline-flex align-items-center rounded border-0 text-decoration-none"
+                href="{{ url_for('logout') }}"
+                >Log Out</a
+              >
+            </li>
+            {% else %}
+            <li>
+              <a
+                class="btn sidebar-heading d-inline-flex align-items-center rounded border-0 text-decoration-none"
+                href="{{ url_for('login') }}"
+                >Login</a
+              >
+            </li>
+            {% endif %}
+          </ul>
         </ul>
       </div>
     </div>

@@ -75,3 +75,32 @@ class CreateNewMarketplace(FlaskForm):
         FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
     ])
     submit = SubmitField("Submit Item")
+
+class CreateProjectForm(FlaskForm):
+    title = StringField("Project Title", validators=[DataRequired()])
+    description = CKEditorField("Project Description", validators=[DataRequired()])
+
+    category = SelectField("Category", choices=[
+        ("Class project", "Class project"),
+        ("Presentation", "Presentation"),
+        ("Poster", "Poster"),
+        ("Video", "Video"),
+        ("Writing collection", "Writing collection"),
+        ("Other", "Other"),
+    ])
+
+    level = SelectField("Level", choices=[
+        ("Beginner", "Beginner"), 
+        ("Foundation", "Foundation"), 
+        ("Stage 1", "Stage 1"),
+        ("Stage 2", "Stage 2"),
+        ("Stage 3", "Stage 3"),
+        ("Stage 4", "Stage 4")
+    ])
+
+    image_url = StringField("Project Image URL (Optional)")
+    upload = FileField("Upload Project Image", validators=[
+        FileAllowed(["jpg", "png", "jpeg"], "Images only!")
+    ])
+    embed_code = TextAreaField("Canva / Google Slides Embed Code")
+    submit = SubmitField("Submit Project")

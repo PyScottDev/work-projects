@@ -16,8 +16,8 @@ import cloudinary.utils
 import time
 from datetime import timedelta
 
-from forms import CreatePostForm, CommentForm, CreateNewMarketplace
-from models import db, BlogPost, User, Comment, MarketplaceItem, MarketplaceComment
+from forms import CreatePostForm, CommentForm, CreateNewMarketplace, CreateProjectForm
+from models import db, BlogPost, User, Comment, MarketplaceItem, MarketplaceComment, Project, ProjectComment
 
 load_dotenv()
 
@@ -521,6 +521,208 @@ def toggle_item_availability(item_id):
         flash("Item marked as unavailable.", "success")
 
     return redirect(url_for("user_items", username_slug=item.seller.slug))
+
+##Project Work
+
+@app.route('/projects')
+def get_all_projects():
+    result = db.session.execute(
+        db.select(Project).
+        order_by(Project.id.desc())
+        )
+    posts = result.scalars().all()
+    return render_template("projects.html", all_posts=posts)
+
+
+@app.route("/projects/user/<username_slug>")
+def user_projects(username_slug):
+    user = db.session.execute(
+        db.select(User).where(User.slug == username_slug)
+    ).scalar()
+
+    if not user:
+        return abort(404)
+
+    result = db.session.execute(
+        db.select(Project)
+        .where(Project.author_id == user.id)
+        .order_by(Project.id.desc())
+    )
+
+    posts = result.scalars().all()
+
+    return render_template("projects.html", all_posts=posts, profile_user=user)
+
+@app.route("/project/<int:project_id>", methods=["GET", "POST"])
+def show_project(project_id):
+    project = db.get_or_404(Project, project_id)
+    form = CommentForm()
+
+    if form.validate_on_submit():
+        if not current_user.is_authenticated:
+            flash("You need to login to comment.", "warning")
+            return redirect(url_for("login"))
+
+        new_comment = ProjectComment(
+            text=form.comment.data,
+            comment_author=current_user,
+            parent_project=project
+        )
+
+        db.session.add(new_comment)
+        db.session.commit()
+
+        return redirect(url_for("show_project", project_id=project.id))
+
+    return render_template("project.html", post=project, form=form)
+
+@app.route("/projects/new-project", methods=["GET", "POST"])
+@login_required
+def add_new_project():
+    form = CreateProjectForm()
+
+    if form.validate_on_submit():
+        image_file = form.upload.data
+        image_url = form.image_url.data or "https://images.unsplash.com/photo-1432821596592-e2c18b78144f"
+        public_id = None
+
+        if image_file:
+            upload_result = cloudinary.uploader.upload(
+                image_file,
+                type="authenticated",
+                folder="project_files_folder/"
+            )
+            image_url = upload_result["secure_url"]
+            public_id = upload_result["public_id"]
+
+        new_post = Project(
+            title=form.title.data,
+            description=form.description.data,
+            image_url=image_url,
+            image_public_id=public_id,
+            author=current_user,
+            date=date.today().strftime("%B %d, %Y"),
+            category=form.category.data,
+            level=form.level.data,
+            embed_code=form.embed_code.data,
+            provider="canva"
+        )
+
+        db.session.add(new_post)
+        db.session.commit()
+
+        return redirect(url_for("get_all_projects"))
+
+    return render_template("new-project.html", form=form)
+
+@app.route("/edit-project/<int:project_id>", methods=["GET", "POST"])
+@login_required
+def edit_project(project_id):
+    project = db.get_or_404(Project, project_id)
+
+    if current_user.id != project.author_id and current_user.email != "scottsomerville@flireland.com":
+        return abort(403)
+
+    edit_form = CreateProjectForm(
+        title=project.title,
+        description=project.description,
+        category=project.category,
+        level=project.level,
+        image_url=project.image_url,
+        embed_code=project.embed_code,
+    )
+
+    if edit_form.validate_on_submit():
+        image_file = edit_form.upload.data
+
+        if image_file:
+            if project.image_public_id:
+                cloudinary.uploader.destroy(
+                    project.image_public_id,
+                    type="authenticated"
+                )
+
+            upload_result = cloudinary.uploader.upload(
+                image_file,
+                type="authenticated",
+                folder="project_files_folder/"
+            )
+
+            project.image_url = upload_result["secure_url"]
+            project.image_public_id = upload_result["public_id"]
+
+        else:
+            project.image_url = edit_form.image_url.data
+
+        project.title = edit_form.title.data
+        project.description = edit_form.description.data
+        project.category = edit_form.category.data
+        project.level = edit_form.level.data
+        project.embed_code = edit_form.embed_code.data
+        project.provider = "canva"
+
+        db.session.commit()
+
+        return redirect(url_for("show_project", project_id=project.id))
+
+    return render_template("new-project.html", form=edit_form, is_edit=True)
+
+@app.route("/delete-project/<int:project_id>")
+@login_required
+def delete_project(project_id):
+    project_to_delete = db.get_or_404(Project, project_id)
+
+    if current_user.id != project_to_delete.author_id and current_user.email != "scottsomerville@flireland.com":
+        return abort(403)
+
+    if project_to_delete.image_public_id:
+        cloudinary.uploader.destroy(
+            project_to_delete.image_public_id,
+            type="authenticated"
+        )
+
+    db.session.delete(project_to_delete)
+    db.session.commit()
+
+    return redirect(url_for("get_all_projects"))
+
+
+@app.route("/edit-project-comment/<int:comment_id>", methods=["GET", "POST"])
+@login_required
+def edit_project_comment(comment_id):
+    comment = db.get_or_404(ProjectComment, comment_id)
+
+    if current_user.id != comment.author_id and current_user.email != "scottsomerville@flireland.com":
+        return abort(403)
+
+    edit_form = CommentForm(comment=comment.text)
+
+    if edit_form.validate_on_submit():
+        comment.text = edit_form.comment.data
+        db.session.commit()
+        return redirect(url_for("show_project", project_id=comment.project_id))
+
+    return render_template(
+        "project.html",
+        post=comment.parent_project,
+        form=edit_form,
+        is_edit=True
+    )
+    
+@app.route("/delete-project-comment/<int:comment_id>")
+@login_required
+def delete_project_comment(comment_id):
+    comment_to_delete = db.get_or_404(ProjectComment, comment_id)
+    project_id = comment_to_delete.project_id
+
+    if current_user.id != comment_to_delete.author_id and current_user.email != "scottsomerville@flireland.com":
+        return abort(403)
+
+    db.session.delete(comment_to_delete)
+    db.session.commit()
+
+    return redirect(url_for("show_project", project_id=project_id))
+
 
 @app.route("/about")
 def about():

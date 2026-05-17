@@ -1,0 +1,201 @@
+{% from "bootstrap5/form.html" import render_form %} {% include "header.html" %}
+
+<main id="mainContent" class="container mt-3 mt-md-5 pt-0 pt-md-5">
+  <div class="row justify-content-left">
+    <div class="col-md-10 col-lg-8 ms-md-5 ps-md-5">
+      <article class="post-content">
+        <h1 class="display-4 fw-bold text-dark mb-3">{{ post.title }}</h1>
+        <p class="lead text-muted mb-4">{{ post.category }}</p>
+
+        <div class="d-flex align-items-center gap-2 gap-md-3 mb-3 mb-md-4">
+          <img
+            src="{{ post.author.img_url }}"
+            class="rounded-circle border"
+            style="width: 45px; height: 45px; object-fit: cover"
+          />
+
+          <div class="d-flex flex-column flex-grow-1 overflow-hidden">
+            <a
+              href="{{ url_for('user_projects', username_slug=post.author.slug) }}"
+              class="text-decoration-none fw-bold text-dark"
+            >
+              {{ post.author.name }}
+            </a>
+            <span class="small text-muted">{{ post.date }}</span>
+          </div>
+
+          <div
+            class="d-flex flex-column flex-md-row gap-1 gap-md-2 align-items-end align-items-md-center"
+          >
+            <span class="badge rounded-pill bg-primary px-2 px-md-3">
+              {{ post.category }}
+            </span>
+            <span class="badge rounded-pill bg-secondary px-2 px-md-3">
+              {{ post.level }}
+            </span>
+          </div>
+        </div>
+
+        {% if post.embed_code %}
+        <div class=""project-embed mb-5 mx-auto"">{{ post.embed_code | safe }}</div>
+        {% endif %} {% if post.image_public_id or post.image_url %}
+        <img
+          src="{{ get_signed_url(post.image_public_id) or post.image_url }}"
+          class="img-fluid rounded-4 shadow-sm mb-4 w-100"
+          alt="{{ post.title }}"
+        />
+        {% endif %}
+
+        <div class="blog-body text-dark lh-lg fs-5 mb-5">
+          {{ post.description | safe }}
+        </div>
+
+        {% if current_user.email == "scottsomerville@flireland.com" or
+        current_user.id == post.author_id %}
+        <div class="d-flex justify-content-end mb-5">
+          <a
+            class="btn btn-outline-primary"
+            href="{{ url_for('edit_project', project_id=post.id) }}"
+          >
+            Edit Project
+          </a>
+        </div>
+        {% endif %}
+
+        <hr />
+
+        <div class="comment-section mt-5">
+          <h4 class="mb-4">Comments</h4>
+
+          <ul class="list-unstyled mt-5">
+            {% for comment in post.comments %}
+            <li class="d-flex gap-3 mb-4">
+              <div class="commenterImage">
+                <img
+                  src="{{ comment.comment_author.img_url }}"
+                  class="rounded-circle"
+                  style="width: 40px; height: 40px"
+                  onerror="
+                    this.src =
+                      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
+                  "
+                />
+              </div>
+
+              <div class="bg-light p-3 rounded-3 flex-grow-1">
+                <div class="fw-bold small mb-1">
+                  {{ comment.comment_author.name }}
+                </div>
+
+                <div class="commentText text-dark">
+                  {{ comment.text | safe }}
+                </div>
+
+                {% if current_user.email == "scottsomerville@flireland.com" or
+                current_user.id == comment.author_id %}
+                <div class="d-flex justify-content-end mb-2">
+                  <a
+                    class="btn btn-sm btn-outline-primary"
+                    href="{{ url_for('edit_project_comment', comment_id=comment.id) }}#comment-section"
+                  >
+                    Edit
+                  </a>
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteProjectCommentModal"
+                    data-commentid="{{ comment.id }}"
+                  >
+                    Delete
+                  </button>
+                </div>
+                {% endif %}
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+
+          {% if current_user.is_authenticated %}
+          <div class="reply-box" id="comment-section">
+            {% if is_edit %}
+            <span class="text-primary">Editing your comment...</span>
+            {% else %}
+            <h5 class="mb-3">Leave a Reply</h5>
+            {% endif %} {{ render_form(form, novalidate=True,
+            button_map={"submit": "primary"}) }} {% if is_edit %}
+            <a
+              href="{{ url_for('show_project', project_id=post.id) }}"
+              class="btn btn-sm btn-link text-muted"
+            >
+              Cancel Edit
+            </a>
+            {% endif %}
+          </div>
+          {% else %}
+          <div class="text-center bg-light p-4 rounded-3">
+            <p class="mb-3">Want to join the discussion?</p>
+            <a href="{{ url_for('login') }}" class="btn btn-primary">
+              Log in to Comment
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </article>
+    </div>
+  </div>
+</main>
+
+<div
+  class="modal fade"
+  id="deleteProjectCommentModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Comment?</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        Are you sure you want to remove this comment?
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <a id="confirmDeleteProjectCommentBtn" href="#" class="btn btn-danger">
+          Delete
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const deleteProjectCommentModal = document.getElementById(
+    "deleteProjectCommentModal",
+  );
+
+  if (deleteProjectCommentModal) {
+    deleteProjectCommentModal.addEventListener("show.bs.modal", (event) => {
+      const button = event.relatedTarget;
+      const commentId = button.getAttribute("data-commentid");
+      const confirmBtn = deleteProjectCommentModal.querySelector(
+        "#confirmDeleteProjectCommentBtn",
+      );
+
+      confirmBtn.href = "/delete-project-comment/" + commentId;
+    });
+  }
+</script>
+
+{% include "footer.html" %}

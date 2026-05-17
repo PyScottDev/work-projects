@@ -1,0 +1,124 @@
+{% include "header.html" %}
+
+<div class="container mt-3 mt-md-5">
+  <div class="row">
+    <main id="mainContent" class="col-12 col-md-9 ps-3 ps-md-5">
+      {% for post in all_posts %}
+      <div class="row mb-5 align-items-center">
+        <div class="col-12 col-lg-8 order-2 order-lg-1">
+          <a href="{{ url_for('show_project', project_id=post.id) }}" class="text-decoration-none text-dark">
+            <h2 class="fw-bold">{{ post.title }}</h2>
+            <h3 class="h6 text-muted">{{ post.description | striptags | truncate(120) }}</h3>
+          </a>
+
+          <div
+            class="post-meta d-flex align-items-center flex-wrap gap-2 mb-1 mb-md-3"
+          >
+            <img
+              src="{{ post.author.img_url }}"
+              alt="{{ post.author.name }}"
+              class="rounded-circle border"
+              style="width: 35px; height: 35px; object-fit: cover"
+            />
+
+            <span class="text-muted small">
+              <span class="text-decoration-none fw-bold text-dark">
+                {{ post.author.name }}
+              </span>
+              {{ post.date }}
+            </span>
+
+            <span class="badge rounded-pill bg-primary text-light px-3">
+              {{ post.category }}
+            </span>
+
+            <span class="badge rounded-pill bg-secondary text-light px-3">
+              {{ post.level }}
+            </span>
+
+            {% if current_user.email == "scottsomerville@flireland.com" or current_user.id == post.author_id %}
+            <button
+              type="button"
+              class="ms-auto text-danger btn btn-link p-0 border-0"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteProjectModal"
+              data-projectid="{{ post.id }}"
+              data-projecttitle="{{ post.title }}"
+              style="vertical-align: middle;"
+            >
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4 order-1 order-lg-2 mb-3 mb-lg-0">
+          <img
+            src="{{ get_signed_url(post.image_public_id) or post.image_url }}"
+            class="img-fluid rounded"
+            alt="Project Image"
+          />
+        </div>
+      </div>
+      <hr />
+      {% endfor %}
+    </main>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="deleteProjectModal"
+  tabindex="-1"
+  aria-labelledby="deleteProjectModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteProjectModalLabel">Confirm Delete</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        Are you sure you want to delete
+        "<strong><span id="projectTitleToConfirm"></span></strong>"? This action is
+        permanent.
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <a id="confirmDeleteProjectBtn" href="#" class="btn btn-danger">
+          Delete Project
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const deleteProjectModal = document.getElementById('deleteProjectModal');
+
+  if (deleteProjectModal) {
+    deleteProjectModal.addEventListener('show.bs.modal', event => {
+      const button = event.relatedTarget;
+      const projectId = button.getAttribute('data-projectid');
+      const projectTitle = button.getAttribute('data-projecttitle');
+
+      const modalTitleSpan = deleteProjectModal.querySelector('#projectTitleToConfirm');
+      const confirmBtn = deleteProjectModal.querySelector('#confirmDeleteProjectBtn');
+
+      modalTitleSpan.textContent = projectTitle;
+      confirmBtn.href = '/delete-project/' + projectId;
+    });
+  }
+</script>
+
+{% include "footer.html" %}

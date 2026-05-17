@@ -22,6 +22,8 @@ class User(UserMixin, db.Model):
     comments = relationship("Comment", back_populates="comment_author")
     marketplace_items = relationship("MarketplaceItem", back_populates="seller")
     marketplace_comments = relationship("MarketplaceComment", back_populates="comment_author")
+    projects = relationship("Project", back_populates="author")
+    project_comments = relationship("ProjectComment", back_populates="comment_author")
     
 
 class BlogPost(db.Model):
@@ -79,3 +81,30 @@ class MarketplaceComment(db.Model):
     item_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("marketplace_items.id"), nullable=False)
     comment_author = relationship("User", back_populates="marketplace_comments")
     parent_item = relationship("MarketplaceItem", back_populates="comments")
+    
+class Project(db.Model):
+    __tablename__ = "projects"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    author_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user.id"), nullable=False)
+    author = relationship("User", back_populates="projects")
+    comments = relationship("ProjectComment", back_populates="parent_project")
+    title: Mapped[str] = mapped_column(String(250), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    date: Mapped[str] = mapped_column(String(250), nullable=False)
+    level: Mapped[str] = mapped_column(String(100), nullable=True)
+    category: Mapped[str] = mapped_column(String(100), nullable=True)
+    image_url: Mapped[str] = mapped_column(Text, nullable=True)
+    image_public_id: Mapped[str] = mapped_column(String(500), nullable=True)
+    provider: Mapped[str] = mapped_column(String(100), nullable=True)
+    embed_code: Mapped[str] = mapped_column(Text, nullable=True)
+    
+class ProjectComment(db.Model):
+    __tablename__ = "project_comment"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    text: Mapped[str] = mapped_column(String(500), nullable=False)
+    author_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("user.id"), nullable=False)
+    project_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("projects.id"), nullable=False)
+    comment_author = relationship("User", back_populates="project_comments")
+    parent_project = relationship("Project", back_populates="comments")
